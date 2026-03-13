@@ -1,0 +1,62 @@
+### Login USER demo
+POST http://localhost:8000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@demo.com",
+  "password": "Demo1234!"
+}
+
+###
+### Login AGENT demo
+POST http://localhost:8000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "agent@demo.com",
+  "password": "Demo1234!"
+}
+
+###
+### Obtener info del usuario actual
+GET http://localhost:8000/api/auth/me
+Authorization: Bearer {{access_token}}
+
+###
+### Listar tickets (USER ve los suyos, AGENT ve todos)
+GET http://localhost:8000/api/tickets?page=1&page_size=10&status=&priority=&search=
+Authorization: Bearer {{access_token}}
+
+###
+### Crear ticket (solo USER)
+POST http://localhost:8000/api/tickets
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "title": "Ejemplo de ticket desde .http",
+  "description": "Descripción del ticket de ejemplo",
+  "priority": "HIGH"
+}
+
+###
+### Actualizar ticket (PATCH)
+PATCH http://localhost:8000/api/tickets/1
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "status": "IN_PROGRESS",
+  "priority": "MEDIUM"
+}
+
+###
+### Añadir comentario a un ticket
+POST http://localhost:8000/api/tickets/1/comments
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "content": "Comentario de prueba desde requests.http"
+}
+

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Portal de Incidencias</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="app-header">
+        <h1>Portal de Incidencias</h1>
+        <div id="user-info" class="user-info hidden">
+          <span id="user-email"></span>
+          <span id="user-role" class="badge"></span>
+          <button id="logout-btn" class="btn-secondary">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <main>
+        <section id="login-view" class="card">
+          <h2>Iniciar sesión</h2>
+          <form id="login-form">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" required />
+            </div>
+            <div class="form-group">
+              <label for="password">Contraseña</label>
+              <input type="password" id="password" required />
+            </div>
+            <button type="submit" class="btn-primary full-width">
+              Entrar
+            </button>
+          </form>
+          <div class="hint">
+            <p><strong>Demo USER</strong>: user@demo.com / Demo1234!</p>
+            <p><strong>Demo USER1</strong>: user1@demo.com / Demo1234!</p>
+            <p><strong>Demo AGENT</strong>: agent@demo.com / Demo1234!</p>
+          </div>
+          <div id="login-error" class="error-message hidden"></div>
+        </section>
+
+        <section id="dashboard-view" class="hidden">
+          <div class="layout">
+            <section class="card">
+              <div class="card-header">
+                <h2 id="tickets-title">Tickets</h2>
+                <div class="card-header-actions">
+                  <button
+                    id="create-ticket-btn"
+                    class="btn-primary"
+                    style="display: none"
+                  >
+                    Crear ticket
+                  </button>
+                  <button
+                    id="export-tickets-btn"
+                    class="btn-secondary"
+                    style="display: none"
+                    type="button"
+                  >
+                    Exportar a Excel
+                  </button>
+                </div>
+              </div>
+
+              <div class="filters">
+                <select id="filter-status">
+                  <option value="">Estado: todos</option>
+                  <option value="OPEN">OPEN</option>
+                  <option value="IN_PROGRESS">IN_PROGRESS</option>
+                  <option value="RESOLVED">RESOLVED</option>
+                  <option value="CLOSED">CLOSED</option>
+                </select>
+                <select id="filter-priority">
+                  <option value="">Prioridad: todas</option>
+                  <option value="LOW">LOW</option>
+                  <option value="MEDIUM">MEDIUM</option>
+                  <option value="HIGH">HIGH</option>
+                </select>
+                <input
+                  type="text"
+                  id="filter-search"
+                  placeholder="Buscar..."
+                />
+                <button id="filter-apply" class="btn-secondary">
+                  Filtrar
+                </button>
+              </div>
+
+              <div id="tickets-loading" class="loading hidden">
+                Cargando tickets...
+              </div>
+
+              <table class="tickets-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Creado</th>
+                    <th>Asignado a</th>
+                  </tr>
+                </thead>
+                <tbody id="tickets-body"></tbody>
+              </table>
+
+              <div class="pagination">
+                <button id="page-prev" class="btn-secondary">Anterior</button>
+                <span id="page-info"></span>
+                <button id="page-next" class="btn-secondary">Siguiente</button>
+              </div>
+            </section>
+
+            <section id="ticket-detail" class="card">
+              <div class="ticket-detail-header">
+                <h2>Detalle del ticket</h2>
+                <button id="close-detail-btn" class="btn-icon" type="button" title="Cerrar detalle" aria-label="Cerrar detalle">&times;</button>
+              </div>
+              <div id="ticket-empty">Selecciona un ticket para ver el detalle.</div>
+              <div id="ticket-detail-content" class="hidden">
+                <div class="ticket-main">
+                  <div class="ticket-header">
+                    <h3 id="ticket-title"></h3>
+                    <div class="badges">
+                      <span id="ticket-priority" class="badge"></span>
+                      <span id="ticket-status" class="badge"></span>
+                    </div>
+                  </div>
+                  <p id="ticket-description"></p>
+                  <div class="meta">
+                    <p>
+                      <strong>Creado por:</strong>
+                      <span id="ticket-created-by"></span>
+                    </p>
+                    <p>
+                      <strong>Asignado a:</strong>
+                      <span id="ticket-assigned-to"></span>
+                    </p>
+                    <!-- Fechas ocultas en el panel para mantenerlo limpio; siguen existiendo en backend/Excel -->
+                  </div>
+                </div>
+
+                <div id="ticket-edit-agent" class="hidden">
+                  <h3>Gestión de ticket (AGENT)</h3>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="edit-status">Estado</label>
+                      <select id="edit-status">
+                        <option value="OPEN">OPEN</option>
+                        <option value="IN_PROGRESS">IN_PROGRESS</option>
+                        <option value="RESOLVED">RESOLVED</option>
+                        <option value="CLOSED">CLOSED</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="edit-priority">Prioridad</label>
+                      <select id="edit-priority">
+                        <option value="LOW">LOW</option>
+                        <option value="MEDIUM">MEDIUM</option>
+                        <option value="HIGH">HIGH</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button id="assign-to-me" class="btn-secondary">
+                    Asignarme ticket
+                  </button>
+                  <button id="save-agent-edit" class="btn-primary">
+                    Guardar cambios
+                  </button>
+                  <button id="delete-ticket" class="btn-danger">
+                    Eliminar ticket
+                  </button>
+                </div>
+
+                <div class="comments">
+                  <h3>Comentarios</h3>
+                  <p class="comments-hint">Actualizaciones entre usuario y agente. Cada comentario es definitivo y no se puede editar.</p>
+                  <div id="comments-list"></div>
+                  <div id="comments-loading" class="loading hidden">
+                    Cargando comentarios...
+                  </div>
+                  <div class="form-group">
+                    <label for="new-comment">Nuevo comentario</label>
+                    <textarea id="new-comment" rows="3" placeholder="Escribe aquí y pulsa «Añadir comentario» para guardar."></textarea>
+                  </div>
+                  <button id="add-comment" class="btn-secondary" type="button">
+                    Añadir comentario
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <div id="create-ticket-modal" class="modal hidden">
+          <div class="modal-content card">
+            <div class="modal-header">
+              <h2>Crear nuevo ticket</h2>
+              <button id="close-modal" class="btn-icon">&times;</button>
+            </div>
+            <div class="form-group">
+              <label for="new-title">Título</label>
+              <input type="text" id="new-title" />
+            </div>
+            <div class="form-group">
+              <label for="new-description">Descripción</label>
+              <textarea id="new-description" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="new-priority">Prioridad</label>
+              <select id="new-priority">
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM" selected>MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+              </select>
+            </div>
+            <div class="modal-actions">
+              <button id="create-ticket-submit" class="btn-primary">
+                Crear
+              </button>
+              <button id="create-ticket-cancel" class="btn-secondary">
+                Cancelar
+              </button>
+            </div>
+            <div id="create-ticket-error" class="error-message hidden"></div>
+          </div>
+        </div>
+
+        <div id="global-loading" class="global-loading hidden">
+          <div class="spinner"></div>
+        </div>
+        <div id="global-toast" class="toast hidden"></div>
+      </main>
+    </div>
+    <script src="/app.js"></script>
+  </body>
+</html>
+
