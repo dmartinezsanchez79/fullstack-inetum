@@ -34,8 +34,8 @@ def on_startup() -> None:
         seed_data(session)
 
 
-app.include_router(auth.router)
-app.include_router(tickets.router)
+app.include_router(auth)
+app.include_router(tickets)
 
 frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
 if frontend_dir.exists():

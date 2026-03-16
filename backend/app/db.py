@@ -1,5 +1,6 @@
 from pathlib import Path
 from collections.abc import Generator
+from datetime import datetime
 from sqlalchemy import event
 from sqlmodel import SQLModel, Session, create_engine
 
@@ -30,4 +31,24 @@ def init_db() -> None:
 def get_session() -> Generator[Session, None, None]:
     with Session(engine) as session:
         yield session
+
+
+# Actualiza automáticamente `updated_at` en Ticket cuando hay cambios persistentes.
+# Esto evita olvidos de actualizar la marca temporal en distintos puntos del código.
+@event.listens_for(Session, "before_flush")
+def _auto_update_ticket_timestamp(session, flush_context, instances) -> None:
+    try:
+        # Importar aquí para evitar importaciones circulares al cargar modelos.
+        from .models import Ticket
+
+        for obj in session.dirty:
+            # session.dirty incluye objetos no persistidos; filtramos por instancia.
+            if isinstance(obj, Ticket):
+                # Solo tocar si el objeto ya existe en la BD (tiene PK) para evitar
+                # establecer updated_at en instancias nuevas hasta que se inserten.
+                if getattr(obj, "id", None) is not None:
+                    obj.updated_at = datetime.utcnow()
+    except Exception:
+        # Protegemos el listener: no queremos que una excepción rompa el flush.
+        pass
 
