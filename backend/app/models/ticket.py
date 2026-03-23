@@ -1,5 +1,18 @@
 from __future__ import annotations
 
+"""
+Modelos de base de datos para tickets.
+
+Define enums para:
+- `TicketPriority` (LOW/MEDIUM/HIGH)
+- `TicketStatus` (OPEN/IN_PROGRESS/RESOLVED/CLOSED)
+
+Y la tabla `Ticket` con:
+- título y descripción
+- creador y asignación (user.id)
+- fechas de creación y última actualización.
+"""
+
 from datetime import datetime
 from enum import Enum
 from typing import Optional

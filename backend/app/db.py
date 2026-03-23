@@ -1,3 +1,13 @@
+"""
+Persistencia y acceso a SQLite.
+
+Este archivo centraliza:
+- La conexión a la base de datos (`engine`) apuntando al archivo `app.db`.
+- La creación automática de tablas (`init_db()`).
+- La provisión de sesiones (`get_session()`) para que FastAPI pueda inyectarlas con `Depends`.
+- Ajustes para SQLite, como `PRAGMA foreign_keys=ON`.
+"""
+
 from pathlib import Path
 from collections.abc import Generator
 from datetime import datetime

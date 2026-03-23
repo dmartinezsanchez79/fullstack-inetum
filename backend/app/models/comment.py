@@ -1,5 +1,14 @@
 from __future__ import annotations
 
+"""
+Modelos de base de datos para comentarios.
+
+Un `Comment`:
+- pertenece a un `ticket` (ticket_id)
+- tiene autor (author_id -> user.id)
+- guarda contenido y fecha de creación.
+"""
+
 from datetime import datetime
 from typing import Optional
 

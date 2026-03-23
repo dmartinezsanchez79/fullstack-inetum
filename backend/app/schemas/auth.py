@@ -3,6 +3,16 @@ from pydantic import BaseModel, EmailStr, constr
 
 from ..models import UserRole
 
+"""
+Schemas Pydantic para autenticación.
+
+Estos modelos definen:
+- `LoginRequest`: body esperado en login.
+- `Token`: respuesta del login (access_token JWT).
+- `UserCreate`: payload opcional de registro.
+- `UserRead`: respuesta normalizada para devolver info del usuario.
+"""
+
 
 class Token(BaseModel):
     access_token: str

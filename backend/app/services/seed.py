@@ -1,3 +1,13 @@
+"""
+Semillas (seed) del entorno.
+
+Al arrancar el backend, se ejecuta `seed_data(session)` para asegurar que:
+- existen usuarios demo (USER, USER1 y AGENT)
+- existe al menos un conjunto de tickets de ejemplo si la BD está vacía
+
+La función es idempotente: no duplica usuarios si ya existen.
+"""
+
 from sqlmodel import Session, select
 
 from ..core.security import get_password_hash
@@ -5,6 +15,7 @@ from ..models import Comment, Ticket, TicketPriority, TicketStatus, User, UserRo
 
 
 def _get_or_create_user(session: Session, email: str, full_name: str, role: UserRole) -> User:
+    """Crea un usuario si no existe (por email) y devuelve el usuario persistido."""
     user = session.exec(select(User).where(User.email == email)).first()
     if user:
         return user
@@ -21,6 +32,7 @@ def _get_or_create_user(session: Session, email: str, full_name: str, role: User
 
 
 def seed_data(session: Session) -> None:
+    """Semilla de datos demo para el proyecto."""
     # Usuarios demo (idempotente: solo se crean si faltan)
     user_demo = _get_or_create_user(
         session, email="user@demo.com", full_name="Usuario Demo", role=UserRole.USER

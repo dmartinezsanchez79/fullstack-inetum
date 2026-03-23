@@ -5,6 +5,15 @@ from pydantic import BaseModel, Field
 
 from ..models import TicketPriority, TicketStatus
 
+"""
+Schemas Pydantic de tickets.
+
+Separan claramente:
+- TicketCreate: lo que puede enviar el frontend al crear.
+- TicketUpdate: lo que puede modificar un PATCH.
+- TicketRead: la forma estándar de devolver un ticket.
+- PaginatedTickets: respuesta con paginación + filtros.
+"""
 
 class TicketCreate(BaseModel):
     title: str = Field(max_length=200)

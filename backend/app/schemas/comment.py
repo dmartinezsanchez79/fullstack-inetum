@@ -2,6 +2,13 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+"""
+Schemas Pydantic para comentarios.
+
+`CommentCreate` define el contenido que el cliente envía.
+`CommentRead` define el formato que el API devuelve (incluye author_email para el mini chat).
+"""
+
 
 class CommentCreate(BaseModel):
     content: str

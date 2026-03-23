@@ -92,7 +92,7 @@ Endpoints principales:
     - `page`, `page_size`
 - `GET /api/tickets/{id}` – detalle (creador o AGENT)
 - `PATCH /api/tickets/{id}`:
-  - USER → solo `title` y `description` y solo si `status == OPEN`
+  - USER → no permitido (usa comentarios para actualizaciones)
   - AGENT → puede modificar `status`, `priority`, `assigned_to_id`
 - `DELETE /api/tickets/{id}` – solo AGENT
 
@@ -100,6 +100,10 @@ Endpoints principales:
 
 - `POST /api/tickets/{id}/comments` – añadir comentario (creador o AGENT)
 - `GET /api/tickets/{id}/comments` – listar comentarios del ticket
+
+### Exportación a Excel (AGENT)
+
+- `GET /api/tickets/export` – exporta todos los tickets a un `.xlsx` (solo AGENT)
 
 ### Semillas de datos
 
@@ -132,7 +136,7 @@ Si aún no existen tickets, también se crean:
    - Si eres **USER**:
      - Verás "Mis tickets".
      - Botón **"Crear ticket"** (abre modal para nuevo ticket).
-     - Puedes editar título y descripción de tus tickets cuando estén en estado `OPEN`.
+    - Puedes añadir comentarios para dejar actualizaciones (mini chat).
    - Si eres **AGENT**:
      - Verás "Todos los tickets".
      - En el detalle de ticket puedes:
@@ -140,6 +144,7 @@ Si aún no existen tickets, también se crean:
        - Cambiar prioridad (`LOW`, `MEDIUM`, `HIGH`).
        - Pulsar "**Asignarme ticket**" para poner `assigned_to_id` a tu id.
        - Eliminar el ticket.
+    - Puedes exportar las incidencias a Excel desde el dashboard.
 5. Vista detalle:
    - Muestra datos del ticket, metadatos y comentarios.
    - Caja de texto para añadir comentarios (USER creador o AGENT).
@@ -155,6 +160,7 @@ En `requests.http` tienes 4–6 ejemplos listos para usar (VSCode/Cursor/Intelli
 - `POST /api/tickets`
 - `PATCH /api/tickets/{id}`
 - `POST /api/tickets/{id}/comments`
+- `GET /api/tickets/export`
 
 Solo debes sustituir `{{access_token}}` por el token devuelto en el login.
 

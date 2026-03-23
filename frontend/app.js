@@ -1,5 +1,17 @@
 const apiBase = "/api";
 
+/**
+ * App JavaScript (vanilla) de la SPA.
+ *
+ * Este archivo gestiona:
+ * - Login (POST /api/auth/login) y persistencia del JWT en localStorage
+ * - Carga/listado de tickets (GET /api/tickets) con filtros y paginación
+ * - Detalle de ticket (GET /api/tickets/{id})
+ * - Mini-chat de comentarios (GET/POST /api/tickets/{id}/comments)
+ * - Acciones de AGENT: asignar y guardar estado/prioridad
+ * - Exportación a Excel (GET /api/tickets/export)
+ */
+
 let accessToken = null;
 let currentUser = null;
 let currentPage = 1;
@@ -50,6 +62,10 @@ function setGlobalLoading(visible) {
 }
 
 async function apiFetch(path, options = {}) {
+  // Wrapper de fetch para:
+  // 1) adjuntar Authorization Bearer
+  // 2) forzar Content-Type JSON en requests con body
+  // 3) traducir errores a mensajes claros
   const headers = options.headers || {};
   if (accessToken) {
     headers["Authorization"] = `Bearer ${accessToken}`;
@@ -106,6 +122,7 @@ function logout() {
 }
 
 async function handleLogin(e) {
+  // Login con email/password -> guarda access_token y renderiza dashboard
   e.preventDefault();
   const email = $("email").value.trim();
   const password = $("password").value;
@@ -162,6 +179,7 @@ function formatDate(iso) {
 }
 
 async function loadTickets(pageArg) {
+  // Carga tickets aplicando filtros y paginación desde la UI
   if (pageArg) {
     currentPage = pageArg;
   }
@@ -218,6 +236,7 @@ async function selectTicketRow(row, ticketId) {
 }
 
 async function loadTicketDetail(ticketId) {
+  // Carga detalle del ticket y configura el panel derecho según rol
   setHidden($("ticket-empty"), true);
   setHidden($("ticket-detail-content"), false);
   try {
@@ -247,6 +266,7 @@ async function loadTicketDetail(ticketId) {
 }
 
 async function loadComments(ticketId) {
+  // Carga el historial de comentarios del ticket (mini chat)
   setHidden($("comments-loading"), false);
   const list = $("comments-list");
   list.innerHTML = "";
@@ -273,6 +293,7 @@ async function loadComments(ticketId) {
 }
 
 async function handleSaveAgentEdit() {
+  // Guarda únicamente status/prioridad (requiere botón explícito)
   if (!currentTicket) return;
   // Solo se guardan cambios si se pulsa explícitamente este botón.
   const payload = {
@@ -294,6 +315,7 @@ async function handleSaveAgentEdit() {
 }
 
 async function handleAssignToMe() {
+  // Solo asigna el ticket al agente logeado (no guarda estado/prioridad)
   if (!currentTicket || !currentUser || currentUser.role !== "AGENT") return;
   // Este botón solo debe asignar el ticket al agente,
   // sin guardar otros cambios que pueda haber en los selectores.
@@ -348,6 +370,7 @@ async function handleAddComment() {
 }
 
 async function handleExportTickets() {
+  // Descarga el Excel generado por el backend (GET /api/tickets/export)
   try {
     setGlobalLoading(true);
     const headers = {};
@@ -402,6 +425,7 @@ function closeCreateModal() {
 }
 
 async function handleCreateTicket() {
+  // Crea un ticket y refresca solo el listado (sin abrir detalle)
   const title = $("new-title").value.trim();
   const description = $("new-description").value.trim();
   const priority = $("new-priority").value;

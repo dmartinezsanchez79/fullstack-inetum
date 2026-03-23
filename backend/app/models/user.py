@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+"""
+Modelos de base de datos para usuarios.
+
+Incluye:
+- `UserRole`: roles permitidos (`USER`, `AGENT`).
+- `User`: tabla persistida con email, rol, hash de contraseña y metadatos.
+"""
+
 from datetime import datetime
 from enum import Enum
 from typing import Optional

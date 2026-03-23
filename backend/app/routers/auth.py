@@ -1,3 +1,15 @@
+"""
+Rutas de autenticación.
+
+Endpoints:
+- POST /api/auth/login -> devuelve access_token (JWT).
+- GET  /api/auth/me    -> devuelve información del usuario autenticado.
+- POST /api/auth/register -> registro (opcional en este proyecto).
+
+Las rutas dependen de SQLModel para consultar la base de datos y de `core.security`
+para verificar/hacer hash de contraseñas y firmar JWT.
+"""
+
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -15,6 +27,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def register_user(payload: UserCreate, db: Session = Depends(get_session)) -> UserRead:
+    """Crea un usuario si el email no existe."""
     existing = db.exec(select(User).where(User.email == payload.email)).first()
     if existing:
         raise HTTPException(
@@ -35,6 +48,7 @@ def register_user(payload: UserCreate, db: Session = Depends(get_session)) -> Us
 
 @router.post("/login", response_model=Token)
 def login(payload: LoginRequest, db: Session = Depends(get_session)) -> Token:
+    """Autentica usuario y devuelve un JWT (access_token)."""
     user = db.exec(select(User).where(User.email == payload.email)).first()
     if not user or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(
@@ -53,5 +67,6 @@ def login(payload: LoginRequest, db: Session = Depends(get_session)) -> Token:
 
 @router.get("/me", response_model=UserRead)
 def read_me(current_user: UserRead = Depends(get_current_user_read)) -> UserRead:
+    """Devuelve el usuario actual (según el JWT)."""
     return current_user
 

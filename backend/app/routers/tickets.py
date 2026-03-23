@@ -1,3 +1,13 @@
+"""
+Rutas de tickets y comentarios.
+
+Responsabilidades:
+- Controlar acceso por rol (USER/AGENT) usando dependencias.
+- CRUD de tickets con reglas de negocio.
+- Historial de comentarios por ticket (tipo mini chat).
+- Exportación a Excel para AGENT.
+"""
+
 from datetime import datetime
 from io import BytesIO
 
@@ -40,6 +50,7 @@ def create_ticket(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> TicketRead:
+    """Crea un ticket. Regla: solo `USER` puede crear."""
     if current_user.role != UserRole.USER:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -73,6 +84,11 @@ def list_tickets(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
 ) -> PaginatedTickets:
+    """Lista tickets con filtros (status, priority, search) y paginación.
+
+    - USER ve solo sus tickets.
+    - AGENT ve todos.
+    """
     base_query = _tickets_query(
         current_user, status_filter, priority_filter, search
     )
@@ -180,6 +196,7 @@ def export_tickets_excel(
 
 
 def _get_ticket_or_404(db: Session, ticket_id: int) -> Ticket:
+    """Obtiene un ticket o devuelve 404 si no existe."""
     ticket = db.get(Ticket, ticket_id)
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket no encontrado")
@@ -187,6 +204,11 @@ def _get_ticket_or_404(db: Session, ticket_id: int) -> Ticket:
 
 
 def _ensure_can_access_ticket(ticket: Ticket, user: User) -> None:
+    """Valida permisos de acceso al ticket.
+
+    - AGENT: acceso completo
+    - USER: solo si es el creador
+    """
     if user.role == UserRole.AGENT:
         return
     if ticket.created_by_id != user.id:
@@ -202,6 +224,7 @@ def get_ticket(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> TicketRead:
+    """Devuelve detalle del ticket si el usuario tiene permisos."""
     ticket = _get_ticket_or_404(db, ticket_id)
     _ensure_can_access_ticket(ticket, current_user)
     creator = db.get(User, ticket.created_by_id)
@@ -228,6 +251,10 @@ def update_ticket(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> TicketRead:
+    """Actualiza un ticket.
+
+    En este proyecto: solo `AGENT` puede modificar `status`, `priority` y `assigned_to_id`.
+    """
     ticket = _get_ticket_or_404(db, ticket_id)
     _ensure_can_access_ticket(ticket, current_user)
 
@@ -266,6 +293,7 @@ def delete_ticket(
     db: Session = Depends(get_db),
     current_agent: User = Depends(get_current_agent),
 ) -> None:
+    """Borra el ticket y también sus comentarios (evita huérfanos)."""
     ticket = _get_ticket_or_404(db, ticket_id)
     # Evita comentarios huérfanos: si borras un ticket, borramos sus comentarios.
     db.exec(delete(Comment).where(Comment.ticket_id == ticket.id))
@@ -280,6 +308,7 @@ def add_comment(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> CommentRead:
+    """Añade un comentario a un ticket (creador del ticket o AGENT)."""
     ticket = _get_ticket_or_404(db, ticket_id)
     _ensure_can_access_ticket(ticket, current_user)
     comment = Comment(
@@ -306,6 +335,7 @@ def list_comments(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> list[CommentRead]:
+    """Devuelve los comentarios del ticket en orden cronológico."""
     ticket = _get_ticket_or_404(db, ticket_id)
     _ensure_can_access_ticket(ticket, current_user)
     comments = db.exec(

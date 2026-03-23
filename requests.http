@@ -60,3 +60,8 @@ Authorization: Bearer {{access_token}}
   "content": "Comentario de prueba desde requests.http"
 }
 
+###
+### Exportar tickets a Excel (AGENT)
+GET http://localhost:8000/api/tickets/export
+Authorization: Bearer {{access_token}}
+

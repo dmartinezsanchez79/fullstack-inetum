@@ -1,3 +1,12 @@
+"""
+Punto de entrada de la aplicación FastAPI.
+
+Responsabilidades:
+- Configurar CORS y servir el frontend estático.
+- En el arranque: crear tablas (SQLite) y sembrar datos demo.
+- Registrar routers de autenticación y tickets.
+"""
+
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -24,6 +33,13 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup() -> None:
+    """
+    Hook de FastAPI que se ejecuta una sola vez al iniciar el servidor.
+    Aquí inicializamos:
+    1) La base de datos (tablas).
+    2) Limpieza de datos huérfanos (comentarios cuyo ticket ya no existe).
+    3) Semillas (usuarios demo y tickets de ejemplo).
+    """
     init_db()
     with Session(engine) as session:
         # Limpieza: borra comentarios cuyo ticket ya no existe (evita “comentarios heredados”).

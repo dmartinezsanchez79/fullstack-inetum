@@ -1,3 +1,10 @@
+"""
+Configuración central del backend.
+
+Se basa en `pydantic-settings` (`BaseSettings`) para permitir que la configuración
+se lea desde variables de entorno (y opcionalmente un fichero `.env`).
+"""
+
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
